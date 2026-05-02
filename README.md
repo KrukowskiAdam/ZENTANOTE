@@ -2,7 +2,7 @@
 
 Interaktywna aplikacja 3D do nauki dźwięków, skal, arpeggi i akordów na gryfie gitary. Zbudowana jako portfolio project z użyciem React, R3F, GSAP i Zustand.
 
-## Stack
+## Stack.
 
 - **React 19** + **TypeScript** + **Vite 7**
 - **@react-three/fiber** + **@react-three/drei** — 3D scena gryfu gitary
