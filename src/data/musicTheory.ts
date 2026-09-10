@@ -40,6 +40,67 @@ export function tuningToLabels(tuning: number[]): string[] {
 
 export const TOTAL_FRETS = 15;
 
+// ── MIDI / Staff utilities ──────────────────────────────────────────────────
+
+/** MIDI base notes for standard-tuning open strings (index 0 = low E = string 6) */
+const STANDARD_MIDI_BASE = [40, 45, 50, 55, 59, 64]; // E2 A2 D3 G3 B3 E4
+
+/** Convert string + fret + current tuning to MIDI note number */
+export function stringFretToMidi(stringIndex: number, fret: number, tuning: number[]): number {
+  const semitoneShift = tuning[stringIndex] - STANDARD_TUNING[stringIndex];
+  return STANDARD_MIDI_BASE[stringIndex] + semitoneShift + fret;
+}
+
+// Chromatic semitone → nearest lower natural note index (C=0…B=6) + accidental
+const SEMI_TO_DIATONIC: { nat: number; acc: string }[] = [
+  { nat: 0, acc: ''  }, // C
+  { nat: 0, acc: '#' }, // C#
+  { nat: 1, acc: ''  }, // D
+  { nat: 1, acc: '#' }, // D#
+  { nat: 2, acc: ''  }, // E
+  { nat: 3, acc: ''  }, // F
+  { nat: 3, acc: '#' }, // F#
+  { nat: 4, acc: ''  }, // G
+  { nat: 4, acc: '#' }, // G#
+  { nat: 5, acc: ''  }, // A
+  { nat: 5, acc: '#' }, // A#
+  { nat: 6, acc: ''  }, // B
+];
+const DIATONIC_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+
+export interface StaffPosition {
+  /** Diatonic step from F5 downward (F5=0, E5=1, D5=2, …) */
+  step: number;
+  accidental: '' | '#';
+  noteName: string;
+  octave: number;
+}
+
+/**
+ * Convert MIDI note number to grand-staff position.
+ * Step 0 = F5 (top treble line). Steps increase going down.
+ */
+export function midiToStaff(midi: number): StaffPosition {
+  const semi = ((midi % 12) + 12) % 12;
+  const octave = Math.floor(midi / 12) - 1; // MIDI 60 = C4
+  const { nat, acc } = SEMI_TO_DIATONIC[semi];
+  // steps from F5 (oct=5, nat=3)
+  const step = (5 - octave) * 7 + (3 - nat);
+  return { step, accidental: acc as '' | '#', noteName: DIATONIC_NAMES[nat] + acc, octave };
+}
+
+/** Ledger lines needed for a note at the given staff step (guitar range D2–G5) */
+export function staffLedgerLines(step: number): number[] {
+  if (step >= 10 && step <= 11) return [10];          // middle C area
+  if (step === 22 || step === 23) return [22];         // E2 / D2
+  if (step >= 24) {                                    // C2 and below
+    const lines: number[] = [];
+    for (let s = 22; s <= step; s += 2) lines.push(s);
+    return lines;
+  }
+  return [];
+}
+
 export type ChordType =
   | 'maj7'
   | 'm7'
