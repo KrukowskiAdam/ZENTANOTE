@@ -38,66 +38,66 @@ export function ChordSelector() {
   const chordLabel = formula ? formatNaming(formula.label, namingMode) : '';
   const chordName = formula ? `${root} ${chordLabel}` : root;
   const formulaStr = formula ? formula.degrees.map((d) => formatNaming(d, namingMode)).join(' \u2013 ') : '';
-  const aliasesStr = formula ? Array.from(new Set(formula.aliases.map((a) => formatNaming(a, namingMode)))).join(', ') : '';
 
   return (
-    <div className="selector">
+    <div id="chords" className="selector">
       <div className="selector__header">
         <h2 className="selector__chord-name">{chordName}</h2>
-        <span className="selector__formula">{formulaStr}</span>
-        <span className="selector__aliases">{aliasesStr}</span>
       </div>
 
       <div className="selector__controls">
-        <div className="selector__group">
-          {NOTE_NAMES.map((note) => (
-            <button
-              key={note}
-              type="button"
-              className={`selector__btn ${root === note ? 'selector__btn--active' : ''}`}
-              onClick={() => setRoot(note)}
-            >
-              {note}
-            </button>
-          ))}
-        </div>
-
-        <div className="selector__divider" />
-
-        <div className="selector__group">
-          <select
-            className="selector__type-select"
-            value={chordType ?? ''}
-            onChange={(e) => setChordType(e.target.value ? e.target.value as ChordType : null)}
-            aria-label="Chord type"
-          >
-            <option value="">— None —</option>
-            {CHORD_TYPES.map((ct) => (
-              <option key={ct} value={ct}>
-                {formatNaming(CHORD_FORMULAS[ct].label, namingMode)}
-                {' '}
-                ({Array.from(new Set(CHORD_FORMULAS[ct].aliases.map((a) => formatNaming(a, namingMode)))).join(', ')})
-              </option>
+        <div className="selector__controls-row">
+          <div className="selector__group">
+            {NOTE_NAMES.map((note) => (
+              <button
+                key={note}
+                type="button"
+                className={`selector__btn ${root === note ? 'selector__btn--active' : ''}`}
+                onClick={() => setRoot(note)}
+              >
+                {note}
+              </button>
             ))}
-          </select>
-        </div>
+          </div>
 
-        <div className="selector__group selector__mode" role="group" aria-label="Chord naming mode">
-          <button
-            type="button"
-            className={`selector__mode-btn ${namingMode === 'jazz' ? 'selector__mode-btn--active' : ''}`}
-            onClick={() => setNamingMode('jazz')}
-          >
-            Jazz symbols
-          </button>
-          <button
-            type="button"
-            className={`selector__mode-btn ${namingMode === 'text' ? 'selector__mode-btn--active' : ''}`}
-            onClick={() => setNamingMode('text')}
-          >
-            Text
-          </button>
+          <div className="selector__divider" />
+
+          <div className="selector__group">
+            <select
+              className="selector__type-select"
+              value={chordType ?? ''}
+              onChange={(e) => setChordType(e.target.value ? e.target.value as ChordType : null)}
+              aria-label="Chord type"
+            >
+              <option value="">— None —</option>
+              {CHORD_TYPES.map((ct) => (
+                <option key={ct} value={ct}>
+                  {formatNaming(CHORD_FORMULAS[ct].label, namingMode)}
+                  {' '}
+                  ({Array.from(new Set(CHORD_FORMULAS[ct].aliases.map((a) => formatNaming(a, namingMode)))).join(', ')})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="selector__group selector__mode" role="group" aria-label="Chord naming mode">
+            <button
+              type="button"
+              className={`selector__mode-btn ${namingMode === 'jazz' ? 'selector__mode-btn--active' : ''}`}
+              onClick={() => setNamingMode('jazz')}
+            >
+              Jazz symbols
+            </button>
+            <button
+              type="button"
+              className={`selector__mode-btn ${namingMode === 'text' ? 'selector__mode-btn--active' : ''}`}
+              onClick={() => setNamingMode('text')}
+            >
+              Text
+            </button>
+          </div>
         </div>
+        <span className="selector__formula">{formulaStr}</span>
       </div>
     </div>
   );

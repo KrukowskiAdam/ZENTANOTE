@@ -24,9 +24,9 @@ export function ScaleSelector() {
   const degreesStr = formula ? formula.degrees.join(' – ') : '';
 
   return (
-    <div className="selector selector--scale">
+    <div id="mode" className="selector selector--scale">
       <div className="selector__header">
-        <span className="selector__formula">{degreesStr}</span>
+        <h2 className="selector__chord-name">Mode</h2>
       </div>
       <div className="selector__controls">
         <div className="selector__group">
@@ -44,6 +44,7 @@ export function ScaleSelector() {
             ))}
           </select>
         </div>
+        <span className="selector__formula">{degreesStr}</span>
       </div>
     </div>
   );

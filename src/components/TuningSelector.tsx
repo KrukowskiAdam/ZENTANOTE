@@ -13,10 +13,13 @@ export function TuningSelector() {
   );
 
   return (
-    <div className="tuning">
-      <div className="tuning__row">
-        <span className="tuning__label">Tuning</span>
+    <div id="tuning" className="selector tuning">
+      <div className="selector__header">
+        <h2 className="selector__chord-name">Tuning</h2>
+      </div>
+      <div className="selector__controls">
         <select
+          id="tuning-preset"
           className="tuning__preset-select"
           value={presetName ?? '__custom'}
           onChange={(e) => {
@@ -30,25 +33,24 @@ export function TuningSelector() {
           ))}
           {presetName === null && <option value="__custom">Custom</option>}
         </select>
-      </div>
-
-      <div className="tuning__strings">
-        {tuning.map((sem, i) => (
-          <div key={i} className="tuning__string">
-            <span className="tuning__string-num">{6 - i}</span>
-            <select
-              className="tuning__note-select"
-              value={sem}
-              onChange={(e) => setStringTuning(i, Number(e.target.value))}
-            >
-              {NOTE_NAMES.map((note, ni) => (
-                <option key={note} value={ni}>
-                  {note}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+        <div className="tuning__strings">
+          {tuning.map((sem, i) => (
+            <div key={i} className="tuning__string">
+              <span className="tuning__string-num">{6 - i}</span>
+              <select
+                className="tuning__note-select"
+                value={sem}
+                onChange={(e) => setStringTuning(i, Number(e.target.value))}
+              >
+                {NOTE_NAMES.map((note, ni) => (
+                  <option key={note} value={ni}>
+                    {note}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
