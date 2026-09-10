@@ -373,7 +373,8 @@
 }
 
 .fret2d__cell--nut::after {
-  border-right: 1px solid #000000;
+  right: -3px;
+  border-right: 6px solid #000000;
 }
 
 .fret2d__string-line {
