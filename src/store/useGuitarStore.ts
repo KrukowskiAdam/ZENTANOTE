@@ -10,6 +10,18 @@ import {
   TUNING_PRESETS,
 } from '../data/musicTheory';
 
+// Open tunings voice a specific chord on the open strings, named after its root.
+// Selecting one of these presets should switch the root to match, so degree
+// markers (e.g. the "1" on fret 0) line up with what the tuning actually plays.
+const OPEN_TUNING_ROOTS: Partial<Record<string, NoteName>> = {
+  'Open D': 'D',
+  'Open G': 'G',
+  'Open A': 'A',
+  'Open E': 'E',
+  'Open C': 'C',
+  DADGAD: 'D',
+};
+
 interface GuitarState {
   root: NoteName;
   chordType: ChordType | null;
@@ -18,11 +30,13 @@ interface GuitarState {
   presetName: string | null;
   positions: ChordPosition[];
   scalePositions: ChordPosition[];
+  highlightedMidi: number | null;
   setRoot: (root: NoteName) => void;
   setChordType: (chordType: ChordType | null) => void;
   setScaleType: (scaleType: ScaleType | null) => void;
   setTuningPreset: (presetName: string) => void;
   setStringTuning: (stringIndex: number, semitone: number) => void;
+  setHighlightedMidi: (midi: number | null) => void;
 }
 
 export const useGuitarStore = create<GuitarState>((set) => ({
@@ -33,6 +47,8 @@ export const useGuitarStore = create<GuitarState>((set) => ({
   presetName: 'Standard',
   positions: getChordPositions('C', 'maj7', STANDARD_TUNING),
   scalePositions: [],
+  highlightedMidi: null,
+  setHighlightedMidi: (midi) => set({ highlightedMidi: midi }),
   setRoot: (root) =>
     set((state) => ({
       root,
@@ -56,11 +72,13 @@ export const useGuitarStore = create<GuitarState>((set) => ({
       const preset = TUNING_PRESETS.find((p) => p.name === presetName);
       if (!preset) return state;
       const tuning = [...preset.tuning];
+      const root = OPEN_TUNING_ROOTS[presetName] ?? state.root;
       return {
         tuning,
         presetName,
-        positions: state.chordType ? getChordPositions(state.root, state.chordType, tuning) : [],
-        scalePositions: state.scaleType ? getScalePositions(state.root, state.scaleType, tuning) : [],
+        root,
+        positions: state.chordType ? getChordPositions(root, state.chordType, tuning) : [],
+        scalePositions: state.scaleType ? getScalePositions(root, state.scaleType, tuning) : [],
       };
     }),
   setStringTuning: (stringIndex, semitone) =>
