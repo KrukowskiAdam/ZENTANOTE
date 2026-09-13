@@ -6,6 +6,57 @@
   overflow: hidden;
 }
 
+/* ── Top Bar (brand + instrument switch) ── */
+
+.topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.25rem;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333333;
+}
+
+.topbar__brand {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.topbar__menu {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.topbar__menu-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 0.4rem;
+  border: 1px solid #333333;
+  background: transparent;
+  color: #999999;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.topbar__menu-btn:hover {
+  color: #ffffff;
+  border-color: #555555;
+}
+
+.topbar__menu-btn--active {
+  background: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
+}
+
+.topbar__menu-btn--active:hover {
+  color: #111111;
+}
+
 /* ── Controls Bar (three panels in one row) ── */
 
 .controls-bar {
@@ -51,6 +102,8 @@
 .selector__formula {
   display: block;
   margin-top: 0.25rem;
+  min-height: 1.38rem;
+  line-height: 1.38rem;
   font-size: 0.92rem;
   color: #666666;
   font-family: 'SF Mono', 'Fira Code', monospace;
@@ -452,6 +505,108 @@
 
 .fret2d__inlay-dot--row4 {
   top: calc(100% * 4 / 6);
+}
+
+/* ── Piano Keyboard ── */
+
+.piano__viewport {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.piano {
+  width: min(160%, 1900px);
+  height: 82%;
+}
+
+.piano__keys {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+
+.piano__key {
+  position: relative;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding-bottom: 0.6rem;
+}
+
+.piano__key--white {
+  height: 100%;
+  background: #fdfdfd;
+  border: 1px solid #cccccc;
+  border-radius: 0 0 0.35rem 0.35rem;
+  z-index: 1;
+}
+
+.piano__key--white:hover {
+  background: #f2f2f2;
+}
+
+.piano__key--black {
+  position: absolute;
+  top: 0;
+  height: 62%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  border: 1px solid #000000;
+  border-radius: 0 0 0.25rem 0.25rem;
+  z-index: 2;
+  padding-bottom: 0.4rem;
+}
+
+.piano__key--black:hover {
+  background: #333333;
+}
+
+.piano__key--highlighted::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 4px;
+  background: rgba(99, 140, 255, 0.18);
+  border: 1.5px solid rgba(99, 140, 255, 0.55);
+  pointer-events: none;
+}
+
+.piano__marker {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+.piano__marker--black {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.62rem;
+}
+
+.piano__key-label {
+  font-size: 0.65rem;
+  color: #999999;
+  pointer-events: none;
 }
 
 /* ── Staff Row (staff + legend) ── */

@@ -4,7 +4,7 @@ import { NOTE_NAMES, CHORD_FORMULAS, type ChordType } from '../data/musicTheory'
 import { useShallow } from 'zustand/react/shallow';
 
 const CHORD_TYPES: ChordType[] = [
-  'maj7', 'm7', '7', 'm7b5', 'dim7', '6', 'm6', '9', 'm9',
+  'maj', 'min', 'maj7', 'm7', '7', 'm7b5', 'dim7', '6', 'm6', '9', 'm9',
   'maj9', '11', '13', '7b9', '7s9', '7s11', '7b13', 'sus2', 'sus4', '7sus',
 ];
 

@@ -102,6 +102,8 @@ export function staffLedgerLines(step: number): number[] {
 }
 
 export type ChordType =
+  | 'maj'
+  | 'min'
   | 'maj7'
   | 'm7'
   | '7'
@@ -130,6 +132,8 @@ export interface ChordFormula {
 }
 
 export const CHORD_FORMULAS: Record<ChordType, ChordFormula> = {
+  maj:  { intervals: [0, 4, 7],           degrees: ['1', '3', '5'],                   label: 'Maj',   aliases: ['maj', 'M', 'major'] },
+  min:  { intervals: [0, 3, 7],           degrees: ['1', '♭3', '5'],                  label: 'm',     aliases: ['min', 'm', 'minor', '-'] },
   maj7: { intervals: [0, 4, 7, 11],       degrees: ['1', '3', '5', '7'],              label: 'Maj7',  aliases: ['maj7', 'Δ', 'Δ7', 'M7', 'Ma7'] },
   m7:   { intervals: [0, 3, 7, 10],       degrees: ['1', '♭3', '5', '♭7'],            label: 'm7',    aliases: ['m7', '-7', 'min7'] },
   '7':  { intervals: [0, 4, 7, 10],       degrees: ['1', '3', '5', '♭7'],             label: '7',     aliases: ['7', 'dom7'] },
@@ -229,4 +233,24 @@ export function getScalePositions(root: NoteName, scaleType: ScaleType, tuning: 
     }
   }
   return result;
+}
+
+export interface ToneClass {
+  /** Pitch class 0-11 (C=0) */
+  semitone: number;
+  degree: string;
+}
+
+/** Pitch classes (independent of any instrument tuning) that make up a chord. */
+export function getChordToneClasses(root: NoteName, chordType: ChordType): ToneClass[] {
+  const rootSemitone = NOTE_TO_SEMITONE[root];
+  const formula = CHORD_FORMULAS[chordType];
+  return formula.intervals.map((i, idx) => ({ semitone: (rootSemitone + i) % 12, degree: formula.degrees[idx] }));
+}
+
+/** Pitch classes (independent of any instrument tuning) that make up a scale. */
+export function getScaleToneClasses(root: NoteName, scaleType: ScaleType): ToneClass[] {
+  const rootSemitone = NOTE_TO_SEMITONE[root];
+  const formula = SCALE_FORMULAS[scaleType];
+  return formula.intervals.map((i, idx) => ({ semitone: (rootSemitone + i) % 12, degree: formula.degrees[idx] }));
 }
