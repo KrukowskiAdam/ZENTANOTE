@@ -24,6 +24,15 @@
   font-weight: 700;
   line-height: 1;
   color: #024b9a;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.topbar__logo {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
 }
 
 .topbar__menu {
