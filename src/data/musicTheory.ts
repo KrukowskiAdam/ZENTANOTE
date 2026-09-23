@@ -89,9 +89,24 @@ export function midiToStaff(midi: number): StaffPosition {
   return { step, accidental: acc as '' | '#', noteName: DIATONIC_NAMES[nat] + acc, octave };
 }
 
-/** Ledger lines needed for a note at the given staff step (guitar range D2–G5) */
+const NATURAL_SEMITONES = [0, 2, 4, 5, 7, 9, 11]; // C D E F G A B
+
+/** Inverse of midiToStaff for natural notes: staff step → MIDI (step 0 = F5 = 77). */
+export function staffStepToMidi(step: number): number {
+  const diatonic = 5 * 7 + 3 - step; // F5 → 38 diatonic steps above C0
+  const octave = Math.floor(diatonic / 7);
+  const nat = ((diatonic % 7) + 7) % 7;
+  return (octave + 1) * 12 + NATURAL_SEMITONES[nat];
+}
+
+/** Ledger lines needed for a note at the given staff step (piano range E1–G7) */
 export function staffLedgerLines(step: number): number[] {
   if (step >= 10 && step <= 11) return [10];          // middle C area
+  if (step <= -2) {                                    // above the treble staff (A5 and higher)
+    const lines: number[] = [];
+    for (let s = -2; s >= step; s -= 2) lines.push(s);
+    return lines;
+  }
   if (step === 22 || step === 23) return [22];         // E2 / D2
   if (step >= 24) {                                    // C2 and below
     const lines: number[] = [];
@@ -129,30 +144,31 @@ export interface ChordFormula {
   degrees: string[];
   label: string;
   aliases: string[];
+  englishName: string;
 }
 
 export const CHORD_FORMULAS: Record<ChordType, ChordFormula> = {
-  maj:  { intervals: [0, 4, 7],           degrees: ['1', '3', '5'],                   label: 'Maj',   aliases: ['maj', 'M', 'major'] },
-  min:  { intervals: [0, 3, 7],           degrees: ['1', '♭3', '5'],                  label: 'm',     aliases: ['min', 'm', 'minor', '-'] },
-  maj7: { intervals: [0, 4, 7, 11],       degrees: ['1', '3', '5', '7'],              label: 'Maj7',  aliases: ['maj7', 'Δ', 'Δ7', 'M7', 'Ma7'] },
-  m7:   { intervals: [0, 3, 7, 10],       degrees: ['1', '♭3', '5', '♭7'],            label: 'm7',    aliases: ['m7', '-7', 'min7'] },
-  '7':  { intervals: [0, 4, 7, 10],       degrees: ['1', '3', '5', '♭7'],             label: '7',     aliases: ['7', 'dom7'] },
-  m7b5: { intervals: [0, 3, 6, 10],       degrees: ['1', '♭3', '♭5', '♭7'],           label: 'm7♭5',  aliases: ['m7♭5', 'ø', 'ø7', '-7♭5'] },
-  dim7: { intervals: [0, 3, 6, 9],        degrees: ['1', '♭3', '♭5', '♭♭7'],          label: 'dim7',  aliases: ['dim7', '°', '°7'] },
-  '6':  { intervals: [0, 4, 7, 9],        degrees: ['1', '3', '5', '6'],              label: '6',     aliases: ['6', 'add6'] },
-  m6:   { intervals: [0, 3, 7, 9],        degrees: ['1', '♭3', '5', '6'],             label: 'm6',    aliases: ['m6', '-6'] },
-  '9':  { intervals: [0, 4, 7, 10, 14],   degrees: ['1', '3', '5', '♭7', '9'],        label: '9',     aliases: ['9', 'add9'] },
-  m9:   { intervals: [0, 3, 7, 10, 14],   degrees: ['1', '♭3', '5', '♭7', '9'],       label: 'm9',    aliases: ['m9', '-9'] },
-  maj9: { intervals: [0, 4, 7, 11, 14],   degrees: ['1', '3', '5', '7', '9'],         label: 'Maj9',  aliases: ['maj9', 'Δ9', 'M9'] },
-  '11': { intervals: [0, 4, 7, 10, 14, 17], degrees: ['1', '3', '5', '♭7', '9', '11'], label: '11',    aliases: ['11', 'add11'] },
-  '13': { intervals: [0, 4, 7, 10, 14, 17, 21], degrees: ['1', '3', '5', '♭7', '9', '11', '13'], label: '13', aliases: ['13', 'add13'] },
-  '7b9': { intervals: [0, 4, 7, 10, 13],  degrees: ['1', '3', '5', '♭7', '♭9'],       label: '7♭9',   aliases: ['7♭9', '7(-9)'] },
-  '7s9': { intervals: [0, 4, 7, 10, 15],  degrees: ['1', '3', '5', '♭7', '♯9'],       label: '7♯9',   aliases: ['7♯9', '7(+9)'] },
-  '7s11': { intervals: [0, 4, 7, 10, 18], degrees: ['1', '3', '5', '♭7', '♯11'],      label: '7♯11',  aliases: ['7♯11', '7(+11)'] },
-  '7b13': { intervals: [0, 4, 7, 10, 20], degrees: ['1', '3', '5', '♭7', '♭13'],      label: '7♭13',  aliases: ['7♭13', '7(-13)'] },
-  sus2: { intervals: [0, 2, 7],           degrees: ['1', '2', '5'],                    label: 'sus2',  aliases: ['sus2'] },
-  sus4: { intervals: [0, 5, 7],           degrees: ['1', '4', '5'],                    label: 'sus4',  aliases: ['sus4', 'sus'] },
-  '7sus': { intervals: [0, 5, 7, 10],     degrees: ['1', '4', '5', '♭7'],             label: '7sus',  aliases: ['7sus', '7sus4'] },
+  maj:  { intervals: [0, 4, 7],           degrees: ['1', '3', '5'],                   label: 'Maj',   aliases: ['maj', 'M', 'major'], englishName: 'Major' },
+  min:  { intervals: [0, 3, 7],           degrees: ['1', '♭3', '5'],                  label: 'm',     aliases: ['min', 'm', 'minor', '-'], englishName: 'Minor' },
+  maj7: { intervals: [0, 4, 7, 11],       degrees: ['1', '3', '5', '7'],              label: 'Maj7',  aliases: ['maj7', 'Δ', 'Δ7', 'M7', 'Ma7'], englishName: 'Major seventh' },
+  m7:   { intervals: [0, 3, 7, 10],       degrees: ['1', '♭3', '5', '♭7'],            label: 'm7',    aliases: ['m7', '-7', 'min7'], englishName: 'Minor seventh' },
+  '7':  { intervals: [0, 4, 7, 10],       degrees: ['1', '3', '5', '♭7'],             label: '7',     aliases: ['7', 'dom7'], englishName: 'Dominant seventh' },
+  m7b5: { intervals: [0, 3, 6, 10],       degrees: ['1', '♭3', '♭5', '♭7'],           label: 'm7♭5',  aliases: ['m7♭5', 'ø', 'ø7', '-7♭5'], englishName: 'Half-diminished seventh' },
+  dim7: { intervals: [0, 3, 6, 9],        degrees: ['1', '♭3', '♭5', '♭♭7'],          label: 'dim7',  aliases: ['dim7', '°', '°7'], englishName: 'Diminished seventh' },
+  '6':  { intervals: [0, 4, 7, 9],        degrees: ['1', '3', '5', '6'],              label: '6',     aliases: ['6', 'add6'], englishName: 'Major sixth' },
+  m6:   { intervals: [0, 3, 7, 9],        degrees: ['1', '♭3', '5', '6'],             label: 'm6',    aliases: ['m6', '-6'], englishName: 'Minor sixth' },
+  '9':  { intervals: [0, 4, 7, 10, 14],   degrees: ['1', '3', '5', '♭7', '9'],        label: '9',     aliases: ['9', 'add9'], englishName: 'Dominant ninth' },
+  m9:   { intervals: [0, 3, 7, 10, 14],   degrees: ['1', '♭3', '5', '♭7', '9'],       label: 'm9',    aliases: ['m9', '-9'], englishName: 'Minor ninth' },
+  maj9: { intervals: [0, 4, 7, 11, 14],   degrees: ['1', '3', '5', '7', '9'],         label: 'Maj9',  aliases: ['maj9', 'Δ9', 'M9'], englishName: 'Major ninth' },
+  '11': { intervals: [0, 4, 7, 10, 14, 17], degrees: ['1', '3', '5', '♭7', '9', '11'], label: '11',    aliases: ['11', 'add11'], englishName: 'Dominant eleventh' },
+  '13': { intervals: [0, 4, 7, 10, 14, 17, 21], degrees: ['1', '3', '5', '♭7', '9', '11', '13'], label: '13', aliases: ['13', 'add13'], englishName: 'Dominant thirteenth' },
+  '7b9': { intervals: [0, 4, 7, 10, 13],  degrees: ['1', '3', '5', '♭7', '♭9'],       label: '7♭9',   aliases: ['7♭9', '7(-9)'], englishName: 'Dominant seventh flat ninth' },
+  '7s9': { intervals: [0, 4, 7, 10, 15],  degrees: ['1', '3', '5', '♭7', '♯9'],       label: '7♯9',   aliases: ['7♯9', '7(+9)'], englishName: 'Dominant seventh sharp ninth' },
+  '7s11': { intervals: [0, 4, 7, 10, 18], degrees: ['1', '3', '5', '♭7', '♯11'],      label: '7♯11',  aliases: ['7♯11', '7(+11)'], englishName: 'Dominant seventh sharp eleventh' },
+  '7b13': { intervals: [0, 4, 7, 10, 20], degrees: ['1', '3', '5', '♭7', '♭13'],      label: '7♭13',  aliases: ['7♭13', '7(-13)'], englishName: 'Dominant seventh flat thirteenth' },
+  sus2: { intervals: [0, 2, 7],           degrees: ['1', '2', '5'],                    label: 'sus2',  aliases: ['sus2'], englishName: 'Suspended second' },
+  sus4: { intervals: [0, 5, 7],           degrees: ['1', '4', '5'],                    label: 'sus4',  aliases: ['sus4', 'sus'], englishName: 'Suspended fourth' },
+  '7sus': { intervals: [0, 5, 7, 10],     degrees: ['1', '4', '5', '♭7'],             label: '7sus',  aliases: ['7sus', '7sus4'], englishName: 'Dominant seventh suspended fourth' },
 };
 
 export interface ChordPosition {

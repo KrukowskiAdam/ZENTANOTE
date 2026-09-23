@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import './App.css';
 import { TopBar } from './components/TopBar';
 import { ChordSelector } from './components/ChordSelector';
@@ -7,17 +8,20 @@ import { Fretboard2D } from './components/Fretboard2D';
 import { Piano } from './components/Piano';
 import { StaffNotation } from './components/StaffNotation';
 import { useViewStore } from './store/useViewStore';
+import { preloadInstrument } from './audio/sound';
 
 function App() {
   const instrument = useViewStore((s) => s.instrument);
 
+  useEffect(() => preloadInstrument(instrument), [instrument]);
+
   return (
     <main className="app">
       <TopBar />
-      <div className="controls-bar">
+      <div className={`controls-bar ${instrument === 'piano' ? 'controls-bar--no-tuning' : ''}`}>
         <ChordSelector />
         <ScaleSelector />
-        <TuningSelector />
+        {instrument === 'guitar' && <TuningSelector />}
       </div>
       <div className="stage">
         {instrument === 'guitar' ? <Fretboard2D /> : <Piano />}

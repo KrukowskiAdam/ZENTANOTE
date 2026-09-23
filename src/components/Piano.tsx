@@ -3,33 +3,29 @@ import { useShallow } from 'zustand/react/shallow';
 import { getChordToneClasses, getScaleToneClasses } from '../data/musicTheory';
 import { DEGREE_COLORS, degreeDisplay } from '../data/degreeColors';
 import { useGuitarStore } from '../store/useGuitarStore';
+import { playMidi } from '../audio/sound';
 
-const START_OCTAVE = 2;
-const END_OCTAVE = 5; // inclusive — only the C of this octave is rendered, as the trailing key
+// Standard 76-key keyboard range: E1–G7.
+const START_MIDI = 28;
+const END_MIDI = 103;
 
-const WHITE_STEPS = [
-  { note: 'C', semitone: 0 },
-  { note: 'D', semitone: 2 },
-  { note: 'E', semitone: 4 },
-  { note: 'F', semitone: 5 },
-  { note: 'G', semitone: 7 },
-  { note: 'A', semitone: 9 },
-  { note: 'B', semitone: 11 },
-] as const;
+const WHITE_PITCH_CLASSES = new Set([0, 2, 4, 5, 7, 9, 11]);
 
-// The black key that follows a given white key; null where there's no gap (E-F, B-C).
-const BLACK_AFTER: Record<string, string | null> = {
-  C: 'C#', D: 'D#', E: null, F: 'F#', G: 'G#', A: 'A#', B: null,
-};
+function pitchClass(midi: number): number {
+  return ((midi % 12) + 12) % 12;
+}
+
+function midiOctave(midi: number): number {
+  return Math.floor(midi / 12) - 1; // MIDI 60 = C4
+}
 
 interface WhiteKey {
   midi: number;
-  note: string;
+  isC: boolean;
   octave: number;
 }
 interface BlackKey {
   midi: number;
-  note: string;
   afterIndex: number; // index into the white-key array this key sits after
 }
 
@@ -37,16 +33,12 @@ function buildKeys(): { white: WhiteKey[]; black: BlackKey[] } {
   const white: WhiteKey[] = [];
   const black: BlackKey[] = [];
 
-  for (let octave = START_OCTAVE; octave <= END_OCTAVE; octave++) {
-    for (const { note, semitone } of WHITE_STEPS) {
-      if (octave === END_OCTAVE && note !== 'C') continue;
-      const midi = (octave + 1) * 12 + semitone;
-      white.push({ midi, note, octave });
-
-      const blackNote = BLACK_AFTER[note];
-      if (blackNote && octave !== END_OCTAVE) {
-        black.push({ midi: midi + 1, note: blackNote, afterIndex: white.length - 1 });
-      }
+  for (let midi = START_MIDI; midi <= END_MIDI; midi++) {
+    const pc = pitchClass(midi);
+    if (WHITE_PITCH_CLASSES.has(pc)) {
+      white.push({ midi, isC: pc === 0, octave: midiOctave(midi) });
+    } else {
+      black.push({ midi, afterIndex: white.length - 1 });
     }
   }
 
@@ -91,8 +83,12 @@ export function Piano() {
                 key={key.midi}
                 className={`piano__key piano__key--white ${isHighlighted ? 'piano__key--highlighted' : ''}`}
                 style={{ width: `${whiteWidthPct}%` }}
-                onClick={() => setHighlightedMidi(isHighlighted ? null : key.midi)}
+                onClick={() => {
+                  setHighlightedMidi(isHighlighted ? null : key.midi);
+                  void playMidi(key.midi, 'piano');
+                }}
               >
+                {key.isC && <span className="piano__key-label">C{key.octave}</span>}
                 {degree && (
                   <div
                     className="piano__marker"
@@ -102,7 +98,6 @@ export function Piano() {
                     {degreeDisplay(degree)}
                   </div>
                 )}
-                {key.note === 'C' && <span className="piano__key-label">C{key.octave}</span>}
               </div>
             );
           })}
@@ -119,11 +114,12 @@ export function Piano() {
                 onClick={(e) => {
                   e.stopPropagation();
                   setHighlightedMidi(isHighlighted ? null : key.midi);
+                  void playMidi(key.midi, 'piano');
                 }}
               >
                 {degree && (
                   <div
-                    className="piano__marker piano__marker--black"
+                    className="piano__marker"
                     style={{ backgroundColor: DEGREE_COLORS[degree] ?? '#888' }}
                     title={degree}
                   >

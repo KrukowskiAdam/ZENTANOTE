@@ -72,6 +72,10 @@
   min-height: 80px;
 }
 
+.controls-bar--no-tuning {
+  grid-template-columns: 1fr 1fr;
+}
+
 /* ── Chord Selector Panel ── */
 
 .selector {
@@ -105,8 +109,13 @@
   min-height: 1.38rem;
   line-height: 1.38rem;
   font-size: 0.92rem;
-  color: #666666;
+  color: #ffffff;
   font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.selector__formula-name {
+  color: #999999;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 
 .selector__formula--row {
@@ -314,16 +323,20 @@
 /* 2D Fretboard Stage */
 
 .stage {
-  flex: 1;
+  /* Shrink-wrap to the fretboard/piano card so leftover height goes to the staff below. */
+  flex: 0 0 auto;
   position: relative;
-  min-height: 0;
   background: #f5f5f5;
   padding: 0.25rem 0.5rem;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fret2d__viewport {
-  height: 100%;
+  width: 100%;
+  max-height: 100%;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -510,7 +523,8 @@
 /* ── Piano Keyboard ── */
 
 .piano__viewport {
-  height: 100%;
+  width: 100%;
+  max-height: 100%;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -524,13 +538,11 @@
 
 .piano {
   width: min(160%, 1900px);
-  height: 82%;
 }
 
 .piano__keys {
   position: relative;
   display: flex;
-  height: 100%;
 }
 
 .piano__key {
@@ -541,12 +553,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.3rem;
-  padding-bottom: 0.6rem;
+  gap: 0.35rem;
+  padding-bottom: 1.1rem;
 }
 
 .piano__key--white {
-  height: 100%;
+  /* Real white keys run about 1 : 6.5 (width : length) — fixed so keys don't stretch tall. */
+  height: 17rem;
   background: #fdfdfd;
   border: 1px solid #cccccc;
   border-radius: 0 0 0.35rem 0.35rem;
@@ -560,13 +573,14 @@
 .piano__key--black {
   position: absolute;
   top: 0;
-  height: 62%;
+  /* ~60% of white-key length, matching real black-key proportions */
+  height: 10rem;
   transform: translateX(-50%);
   background: #1a1a1a;
   border: 1px solid #000000;
   border-radius: 0 0 0.25rem 0.25rem;
   z-index: 2;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.8rem;
 }
 
 .piano__key--black:hover {
@@ -584,26 +598,24 @@
 }
 
 .piano__marker {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 999px;
   z-index: 3;
   display: grid;
   place-items: center;
   color: #ffffff;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   box-shadow: 0px 2px 8px rgba(0,0,0,0.3);
   pointer-events: none;
 }
 
-.piano__marker--black {
-  width: 1.35rem;
-  height: 1.35rem;
-  font-size: 0.62rem;
-}
-
 .piano__key-label {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.65rem;
   color: #999999;
   pointer-events: none;
@@ -612,19 +624,26 @@
 /* ── Staff Row (staff + legend) ── */
 
 .staff-row {
-  flex-shrink: 0;
+  /* Takes all the leftover vertical space the stage no longer claims. */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #f5f5f5;
 }
 
 .staff-section {
   flex: 1;
   min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
   padding: 0.3rem 0.75rem;
   overflow-x: auto;
 }
 
 .staff-section svg {
-  max-height: 30vh;
+  height: 100%;
   width: 100%;
 }
 

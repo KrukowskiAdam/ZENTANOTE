@@ -2,6 +2,7 @@ import { TOTAL_FRETS, tuningToLabels, stringFretToMidi } from '../data/musicTheo
 import { DEGREE_COLORS, degreeDisplay } from '../data/degreeColors';
 import { useGuitarStore } from '../store/useGuitarStore';
 import { useShallow } from 'zustand/react/shallow';
+import { playMidi } from '../audio/sound';
 
 export function Fretboard2D() {
   const { positions, scalePositions, tuning, highlightedMidi, setHighlightedMidi } = useGuitarStore(
@@ -49,7 +50,10 @@ export function Fretboard2D() {
                   <div
                     key={`${stringIndex}-${fret}`}
                     className={`fret2d__cell ${fret === 0 ? 'fret2d__cell--nut' : ''} ${isHighlighted ? 'fret2d__cell--highlighted' : ''}`}
-                    onClick={() => setHighlightedMidi(isHighlighted ? null : cellMidi)}
+                    onClick={() => {
+                      setHighlightedMidi(isHighlighted ? null : cellMidi);
+                      void playMidi(cellMidi, 'guitar');
+                    }}
                     style={{ cursor: 'pointer' }}
                   >
                     <div className="fret2d__string-line" />

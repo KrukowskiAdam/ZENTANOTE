@@ -1,8 +1,12 @@
+import type { MouseEvent } from 'react';
 import { useGuitarStore } from '../store/useGuitarStore';
-import { midiToStaff, staffLedgerLines } from '../data/musicTheory';
+import { useViewStore } from '../store/useViewStore';
+import { midiToStaff, staffLedgerLines, staffStepToMidi } from '../data/musicTheory';
+import { playMidi } from '../audio/sound';
 
 /**
- * StaffNotation — grand staff (treble + bass) covering the guitar range.
+ * StaffNotation — grand staff (treble + bass) covering the full piano range (E1–G7),
+ * so any key on the Piano view can be plotted, ledger lines and all.
  *
  * Geometry reference:
  *   S    = diatonic half-step distance in SVG units (line ↔ adjacent space)
@@ -10,24 +14,30 @@ import { midiToStaff, staffLedgerLines } from '../data/musicTheory';
  *          positive steps go DOWN / lower in pitch)
  *
  * Step map (natural notes only):
+ *  -15 G7  (top of range, several ledger lines above treble)
  *   -1 G5  |  0 F5  2 D5  4 B4  6 G4  8 E4  ← treble staff lines
  *   10 C4  (middle C — ledger)
  *   12 A3  14 F3  16 D3  18 B2  20 G2        ← bass staff lines
  *   22 E2  (1st ledger below bass)
  *   24 D2  (2nd ledger below bass)
+ *   29 E1  (bottom of range, several ledger lines below bass)
  */
 
 const S     = 8;
-const PAD_T = 24;   // px above F5 — room for G5 (step −1)
-const PAD_B = 22;
+const PAD_T = 136;  // px above F5 — room up to G7 (step −15)
+const PAD_B = 8;
 const PAD_L = 72;   // left — clef symbol area
 const VBW   = 1200;
-const VBH   = PAD_T + 25 * S + PAD_B; // 246
+const VBH   = PAD_T + 30 * S + PAD_B; // 384 — down to E1 (step 29)
 
 const sy = (step: number): number => PAD_T + step * S;
 
 const SX1 = PAD_L;
 const SX2 = VBW - 14;
+
+// Clickable range: G7 (step −15) … E1 (step 29)
+const MIN_STEP = -15;
+const MAX_STEP = 29;
 
 // Staff line step positions
 const TREBLE_STEPS = [0, 2, 4, 6, 8];       // F5 D5 B4 G4 E4
@@ -35,6 +45,25 @@ const BASS_STEPS   = [12, 14, 16, 18, 20];  // A3 F3 D3 B2 G2
 
 export function StaffNotation() {
   const highlightedMidi = useGuitarStore((s) => s.highlightedMidi);
+  const setHighlightedMidi = useGuitarStore((s) => s.setHighlightedMidi);
+  const instrument = useViewStore((s) => s.instrument);
+
+  // Click on a line/space → play that natural note and highlight it everywhere.
+  // Clicking the highlighted note's position replays it (keeping its sharp).
+  const handleStaffClick = (e: MouseEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+    const step = Math.min(MAX_STEP, Math.max(MIN_STEP, Math.round((pt.y - PAD_T) / S)));
+    const midi =
+      highlightedMidi != null && midiToStaff(highlightedMidi).step === step
+        ? highlightedMidi
+        : staffStepToMidi(step);
+    setHighlightedMidi(midi);
+    void playMidi(midi, instrument);
+  };
+
 
   const LINE   = '#cccccc';
   const CLEF   = '#333333';
@@ -51,10 +80,11 @@ export function StaffNotation() {
   return (
     <div className="staff-section">
       <svg
+        onClick={handleStaffClick}
         width="100%"
         viewBox={`0 0 ${VBW} ${VBH}`}
-        style={{ display: 'block', height: 'auto' }}
-        aria-label="Grand staff – guitar range D2 to G5"
+        style={{ display: 'block', cursor: 'pointer' }}
+        aria-label="Grand staff – piano range E1 to G7"
       >
         {/* ── Treble staff lines ── */}
         {TREBLE_STEPS.map(step => (
@@ -126,13 +156,13 @@ export function StaffNotation() {
 
         {/* ── Range labels ── */}
         <text
-          x={SX1 - 6} y={sy(-1) + 3.5}
+          x={SX1 - 6} y={sy(-15) + 3.5}
           fontSize={9} fill={REF} fontFamily="monospace" textAnchor="end"
-        >G5</text>
+        >G7</text>
         <text
-          x={SX1 - 6} y={sy(24) + 3.5}
+          x={SX1 - 6} y={sy(29) + 3.5}
           fontSize={9} fill={REF} fontFamily="monospace" textAnchor="end"
-        >D2</text>
+        >E1</text>
 
         {/* ── Highlighted note from fretboard click ── */}
         {highlighted && (() => {

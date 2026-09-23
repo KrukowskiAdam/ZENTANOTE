@@ -97,7 +97,10 @@ export function ChordSelector() {
             </button>
           </div>
         </div>
-        <span className="selector__formula">{formulaStr}</span>
+        <span className="selector__formula">
+          {formulaStr}
+          {formula && <span className="selector__formula-name"> — {formula.englishName}</span>}
+        </span>
       </div>
     </div>
   );
