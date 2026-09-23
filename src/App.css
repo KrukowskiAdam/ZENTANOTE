@@ -19,11 +19,11 @@
 }
 
 .topbar__brand {
-  font-family: 'Purple Purse', 'Space Grotesk', system-ui, sans-serif;
-  font-size: 1.6rem;
-  font-weight: 400;
+  font-family: 'pragmatica-extended', 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
   line-height: 1;
-  color: #ff6b6b;
+  color: #024b9a;
 }
 
 .topbar__menu {
