@@ -1,8 +1,10 @@
+import { DEGREE_COLORS } from '../data/degreeColors';
+
 const LEGEND_ITEMS = [
-  { color: '#FF6B6B', label: 'Tonic',   degree: '1' },
-  { color: '#4ECDC4', label: 'Third',   degree: '3' },
-  { color: '#F2C12E', label: 'Fifth',   degree: '5' },
-  { color: '#5B8DB8', label: 'Seventh', degree: '7' },
+  { color: DEGREE_COLORS['1'], label: 'Tonic',   degree: '1' },
+  { color: DEGREE_COLORS['3'], label: 'Third',   degree: '3' },
+  { color: DEGREE_COLORS['5'], label: 'Fifth',   degree: '5' },
+  { color: DEGREE_COLORS['7'], label: 'Seventh', degree: '7' },
 ] as const;
 
 export function IntervalLegend() {

@@ -1,13 +1,13 @@
 // Core chord tones (1-3-5-7) each get their own hue. Tensions (2/9, 4/11, 6/13)
 // resolve a whole step down to the chord tone below them, so they're rendered
 // as a muted tint of that tone's color rather than an unrelated hue.
-const ROOT = '#FF6B6B';
-const ROOT_TINT = '#C2585A';
-const THIRD = '#4ECDC4';
-const THIRD_TINT = '#4FA89E';
+const ROOT = '#DA3A2E';
+const ROOT_TINT = '#B0564E';
+const THIRD = '#4B9AD5';
+const THIRD_TINT = '#5A87AD';
 const FIFTH = '#F2C12E';
 const FIFTH_TINT = '#C9A227';
-const SEVENTH = '#5B8DB8';
+const SEVENTH = '#024B9A';
 
 export const DEGREE_COLORS: Record<string, string> = {
   '1': ROOT,
