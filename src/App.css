@@ -465,14 +465,14 @@
 }
 
 .fret2d__marker {
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 1.52rem;
+  height: 1.52rem;
   border-radius: 999px;
   z-index: 3;
   display: grid;
   place-items: center;
   color: #ffffff;
-  font-size: 0.86rem;
+  font-size: 0.72rem;
   font-weight: 700;
   box-shadow: 0px 2px 8px rgba(0,0,0,0.3);
 }
@@ -719,8 +719,295 @@
   }
 
   .fret2d__marker {
-    width: 1.43rem;
-    height: 1.43rem;
-    font-size: 0.75rem;
+    width: 1.14rem;
+    height: 1.14rem;
+    font-size: 0.62rem;
+  }
+}
+
+/* ── Mobile (phones, landscape only) ──
+   Separate layout rather than RWD: the instrument fills the screen, all settings
+   live in a slide-out drawer, and the staff is dropped entirely. */
+
+body:has(.app--mobile) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.app--mobile {
+  --m-safe-top: env(safe-area-inset-top, 0px);
+  --m-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --m-stage-pad: 0.35rem;
+  height: 100dvh;
+  flex-direction: row;
+  background: #f5f5f5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Left rail: hamburger + current selection */
+
+.m-rail {
+  flex-shrink: 0;
+  width: calc(2.75rem + env(safe-area-inset-left, 0px));
+  padding: calc(0.4rem + var(--m-safe-top)) 0 calc(0.6rem + var(--m-safe-bottom)) env(safe-area-inset-left, 0px);
+  background: #1a1a1a;
+  border-right: 1px solid #333333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.m-rail__burger,
+.m-drawer__close {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.m-rail__burger:active,
+.m-drawer__close:active {
+  background: #333333;
+}
+
+.m-rail__burger svg,
+.m-drawer__close svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.m-rail__summary {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* Stage fills everything right of the rail */
+
+.app--mobile .stage {
+  flex: 1;
+  min-width: 0;
+  padding: calc(var(--m-stage-pad) + var(--m-safe-top)) calc(var(--m-stage-pad) + env(safe-area-inset-right, 0px)) calc(var(--m-stage-pad) + var(--m-safe-bottom)) var(--m-stage-pad);
+}
+
+.app--mobile .fret2d__viewport,
+.app--mobile .piano__viewport {
+  height: 100%;
+  max-height: none;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.5rem;
+}
+
+.app--mobile .fret2d {
+  /* Six strings share the full visible height. */
+  --fret-cell-height: calc((100dvh - var(--m-safe-top) - var(--m-safe-bottom) - 2 * var(--m-stage-pad) - 0.8rem) / 6);
+  width: 100%;
+  padding: 0;
+}
+
+.app--mobile .fret2d__row,
+.app--mobile .fret2d__inlays {
+  grid-template-columns: 2rem repeat(16, 1fr);
+}
+
+.app--mobile .fret2d__rows::before {
+  left: 2rem;
+}
+
+.app--mobile .fret2d__string-label {
+  font-size: 0.9rem;
+}
+
+.app--mobile .fret2d__marker {
+  --m-marker: min(1.52rem, calc(var(--fret-cell-height) * 0.576), 4.16vw);
+  width: var(--m-marker);
+  height: var(--m-marker);
+  font-size: calc(var(--m-marker) * 0.42);
+}
+
+.app--mobile .fret2d__cell,
+.app--mobile .piano__key {
+  touch-action: manipulation;
+}
+
+.app--mobile .piano {
+  width: 100%;
+  height: 100%;
+}
+
+.app--mobile .piano__keys {
+  height: 100%;
+}
+
+.app--mobile .piano__key--white {
+  height: 100%;
+  padding-bottom: 0.6rem;
+}
+
+.app--mobile .piano__key--black {
+  height: 60%;
+  padding-bottom: 0.45rem;
+}
+
+/* No hover on touch: stop the last-tapped key from staying grey. */
+.app--mobile .piano__key--white:hover {
+  background: #fdfdfd;
+}
+
+.app--mobile .piano__key--black:hover {
+  background: #1a1a1a;
+}
+
+.app--mobile .piano__marker {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.66rem;
+}
+
+.app--mobile .piano__key-label {
+  top: 0.3rem;
+  font-size: 0.6rem;
+}
+
+/* Drawer */
+
+.m-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.m-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.m-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  width: min(26rem, 88vw);
+  padding: var(--m-safe-top) 0 var(--m-safe-bottom) env(safe-area-inset-left, 0px);
+  background: #1a1a1a;
+  border-right: 1px solid #333333;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(-105%);
+  transition: transform 0.25s ease;
+}
+
+.m-drawer--open {
+  transform: translateX(0);
+}
+
+.m-drawer__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333333;
+  padding-right: 0.5rem;
+}
+
+.m-drawer__head .topbar {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+  padding: 0.6rem 0.75rem 0.6rem 1rem;
+}
+
+.m-drawer .selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  border-right: 0;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.m-drawer .selector__controls-row {
+  gap: 0.6rem;
+}
+
+.m-drawer .selector__divider {
+  display: none;
+}
+
+.m-drawer .selector__btn {
+  min-width: 2.5rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.m-drawer .selector__type-select,
+.m-drawer .tuning__preset-select {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.m-drawer .selector__group:has(> .selector__type-select) {
+  width: 100%;
+}
+
+.m-drawer .tuning__note-select {
+  width: 2.6rem;
+  padding: 0.4rem 0;
+}
+
+/* Portrait is not supported: ask to rotate. */
+
+.m-rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: #1a1a1a;
+  color: #ffffff;
+  text-align: center;
+}
+
+.m-rotate svg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.m-rotate p {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+@media (orientation: portrait) {
+  .m-rotate {
+    display: flex;
   }
 }

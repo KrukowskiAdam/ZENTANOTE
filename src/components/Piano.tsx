@@ -29,11 +29,11 @@ interface BlackKey {
   afterIndex: number; // index into the white-key array this key sits after
 }
 
-function buildKeys(): { white: WhiteKey[]; black: BlackKey[] } {
+function buildKeys(startMidi: number, endMidi: number): { white: WhiteKey[]; black: BlackKey[] } {
   const white: WhiteKey[] = [];
   const black: BlackKey[] = [];
 
-  for (let midi = START_MIDI; midi <= END_MIDI; midi++) {
+  for (let midi = startMidi; midi <= endMidi; midi++) {
     const pc = pitchClass(midi);
     if (WHITE_PITCH_CLASSES.has(pc)) {
       white.push({ midi, isC: pc === 0, octave: midiOctave(midi) });
@@ -45,7 +45,12 @@ function buildKeys(): { white: WhiteKey[]; black: BlackKey[] } {
   return { white, black };
 }
 
-export function Piano() {
+interface PianoProps {
+  startMidi?: number;
+  endMidi?: number;
+}
+
+export function Piano({ startMidi = START_MIDI, endMidi = END_MIDI }: PianoProps) {
   const { root, chordType, scaleType, highlightedMidi, setHighlightedMidi } = useGuitarStore(
     useShallow((s) => ({
       root: s.root,
@@ -56,7 +61,7 @@ export function Piano() {
     })),
   );
 
-  const { white, black } = useMemo(buildKeys, []);
+  const { white, black } = useMemo(() => buildKeys(startMidi, endMidi), [startMidi, endMidi]);
 
   const degreeBySemitone = useMemo(() => {
     const map = new Map<number, string>();
